@@ -33,7 +33,7 @@ class Agent ( metaclass=ABCMeta ):
         SHOOT      = 4
         GRAB       = 5
         CLIMB      = 6
-
+    
     @abstractmethod
     def getAction ( self,
     
