@@ -47,61 +47,83 @@ class MyAI ( Agent ):
         self.last_action = Agent.Action.FORWARD
         self.last_position = (1,1)
         self.visited_positions = set()
-        self.visited_positions.add((1,1))
         self.position_stack = []
         self.action_queue = [Agent.Action.CLIMB]
         self.current_direction = (1,0)
         self.current_position = (1,1)
-        self.max_x = float('inf')
-        self.max_y = float('inf')
-
+        self.max_x = float("inf")
+        self.max_y = float("inf")
+        self.has_gold = False
     def getAction( self, stench, breeze, glitter, bump, scream ):
 
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
-        print(self.last_action)
+        # print("positions before visit",self.position_stack)
+        # print("visited", self.visited_positions)
+        # print("actions",self.action_queue)
         if self.last_action == Agent.Action.FORWARD:
+            # print("check empty", self.getUnvisitedAdjacentPositions())
+           
             self.visited_positions.add(self.current_position)
-            self.position_stack.append(self.last_position)
-            if breeze or stench and self.current_position == (1,1):
+            # if self.getUnvisitedAdjacentPositions() != set():
+            #     self.position_stack.append(self.last_position)
+            if (breeze or stench) and self.current_position == (1,1):
+                return Agent.Action.CLIMB
+            if self.current_position == (1,1) and (self.has_gold or self.getUnvisitedAdjacentPositions() == set()):
                 return Agent.Action.CLIMB
             if bump:
                 if self.current_position[0] >= self.current_position[1] and self.current_direction == (1, 0):
-                    self.max_x = self.current_position[0]
+                    self.max_x = self.current_position[0] -1
+                    self.current_position = (self.current_position[0]-1, self.current_position[1])
                 elif self.current_position[0] < self.current_position[1] and self.current_direction == (0, 1):
-                    self.max_y = self.current_position[1]
-
-            if not breeze and not stench and not glitter:
+                    self.max_y = self.current_position[1] -1
+                    self.current_position = (self.current_position[0], self.current_position[1]-1)
+                # print("MAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXESREEEEEEEEEEEEEEEEEEEEEEEEEEEee",self.max_x, self.max_y, self.current_position)
+            elif not breeze and not stench and not glitter and not self.has_gold:
                 for position in self.getUnvisitedAdjacentPositions():
-
+                    self.position_stack.append(self.current_position)
                     self.position_stack.append(position)
-            print((self.position_stack))
             # print(self.visited_positions)
+            # print("postitions after visit", self.position_stack)
             next_position = self.position_stack.pop()
+            while self.current_position == next_position or next_position[0] > self.max_x and next_position[1] > self.max_y:
+                next_position = self.position_stack.pop()
             self.queuePosition(next_position)
+            # print("current posiiton", self.current_position)
+            # print("next position",next_position)
+            # print("current direction", self.current_direction)
             if glitter:
                 self.action_queue.insert(0,Agent.Action.GRAB)
+                self.has_gold = True
             self.last_position = self.current_position
             self.current_position = next_position
+           
         self.last_action = self.action_queue.pop(0)
         return self.last_action
 
     def queuePosition(self, new_position):
-        print((new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]))
+        # print((new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]))
         turns = self.getTurns( (new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]) )
         self.current_direction = (new_position[0] - self.current_position[0], new_position[1] - self.current_position[1])
-        print(turns)
         self.action_queue = turns + self.action_queue
         self.action_queue.insert(len(turns), Agent.Action.FORWARD)
-        print(self.action_queue)
 
     def getTurns(self, new_direction):
         turns = []
         temp_direction = self.current_direction
         while temp_direction != new_direction:
-            temp_direction = self.chooseDirection(temp_direction)
-            turns.append(Agent.Action.TURN_LEFT)
+            left_turn = self.chooseDirection(temp_direction,  Agent.Action.TURN_LEFT)
+            right_turn = self.chooseDirection(temp_direction,  Agent.Action.TURN_RIGHT)
+            if left_turn == new_direction:
+                temp_direction = left_turn
+                turns.append(Agent.Action.TURN_LEFT)
+            elif right_turn == new_direction:
+                temp_direction = right_turn
+                turns.append(Agent.Action.TURN_RIGHT)
+            else:
+                temp_direction = left_turn
+                turns.append(Agent.Action.TURN_LEFT)
             # print(temp_direction, new_direction)
         return turns
 

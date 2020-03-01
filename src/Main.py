@@ -53,7 +53,7 @@ def main ( ):
         world = World()
         score = world.run()
         print ("Your agent scored: " + str(score))
-        return
+        return score
 
     # Important Variables
     debug      = False
