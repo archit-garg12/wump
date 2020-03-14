@@ -62,14 +62,14 @@ class MyAI ( Agent ):
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
-        # print("positions before visit",self.position_stack)
-        # print("visited", self.visited_positions)
-        # print("actions",self.action_queue)
+        print("positions before visit",self.position_stack)
+        print("visited", self.visited_positions)
+        print("actions",self.action_queue)
         if self.wumpus_dead:
             stench = False
         if self.last_action == Agent.Action.FORWARD:
 
-            # print("check empty", self.getUnvisitedAdjacentPositions())
+            print("check empty", self.getUnvisitedAdjacentPositions())
             self.visited_positions.add(self.current_position)
             # if self.getUnvisitedAdjacentPositions() != set():
             #     self.position_stack.append(self.last_position)
@@ -85,18 +85,12 @@ class MyAI ( Agent ):
                     self.stench_tracker.append(self.current_position)
                 if(self.findWumpusLocation(len(self.stench_tracker))):
                     self.position_stack.append(self.current_position)
-                    self.position_stack.append(self.wumpus_position)
-                    # print("current postion", self.current_position)
-                    # print("wumpus", self.wumpus_position)
-                    # print("curr dir", self.current_direction)
-                    # print("wumpus locations", self.stench_tracker)
-                    # print("JNFODSNOSDFHODHFOSDHFODFJOSDFJOSDJFOSDJFOIDFJODJFDS:IFJOSDIFJSDOFJSDOIFJSDOFJSDOIFJDSOIFJDFIOJ",self.action_queue)
-            
+                    self.position_stack.append(self.wumpus_position)            
             if bump:
-                if self.current_position[0] >= self.current_position[1] and self.current_direction == (1, 0):
+                if self.current_direction == (1, 0):
                     self.max_x = self.current_position[0] -1
                     self.current_position = (self.current_position[0]-1, self.current_position[1])
-                elif self.current_position[0] < self.current_position[1] and self.current_direction == (0, 1):
+                elif self.current_direction == (0, 1):
                     self.max_y = self.current_position[1] -1
                     self.current_position = (self.current_position[0], self.current_position[1]-1)
                 print("MAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXESREEEEEEEEEEEEEEEEEEEEEEEEEEEee",self.max_x, self.max_y, self.current_position)
@@ -104,15 +98,15 @@ class MyAI ( Agent ):
                 for position in self.getUnvisitedAdjacentPositions():
                     self.position_stack.append(self.current_position)
                     self.position_stack.append(position)
-            # print(self.visited_positions)
-            # print("postitions after visit", self.position_stack)
+            print(self.visited_positions)
+            print("postitions after visit", self.position_stack)
             next_position = self.position_stack.pop()
             while self.current_position == next_position or next_position[0] > self.max_x or next_position[1] > self.max_y:
                 next_position = self.position_stack.pop()
             self.queuePosition(next_position, Agent.Action.FORWARD)
-            # print("current posiiton", self.current_position)
-            # print("next position",next_position)
-            # print("current direction", self.current_direction)
+            print("current posiiton", self.current_position)
+            print("next position",next_position)
+            print("current direction", self.current_direction)
             if glitter:
                 self.action_queue.insert(0,Agent.Action.GRAB)
                 self.has_gold = True
@@ -128,8 +122,8 @@ class MyAI ( Agent ):
         return self.last_action
 
     def queuePosition(self, new_position, endAction):
-        # print((new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]))
-        # print(self.current_position, new_position, "asdadasda")
+        print((new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]))
+        print(self.current_position, new_position, "asdadasda")
         turns = self.getTurns( (new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]) )
         self.current_direction = (new_position[0] - self.current_position[0], new_position[1] - self.current_position[1])
         self.action_queue = turns + self.action_queue
@@ -139,7 +133,7 @@ class MyAI ( Agent ):
 
     def getTurns(self, new_direction):
         turns = []
-        # print(new_direction, self.current_direction, "BFLASFKAFLAFH")
+        print(new_direction, self.current_direction, "BFLASFKAFLAFH")
         temp_direction = self.current_direction
         while temp_direction != new_direction:
             left_turn = self.chooseDirection(temp_direction,  Agent.Action.TURN_LEFT)
