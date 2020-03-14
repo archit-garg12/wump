@@ -98,7 +98,7 @@ class MyAI ( Agent ):
                 for position in self.getUnvisitedAdjacentPositions():
                     self.position_stack.append(self.current_position)
                     self.position_stack.append(position)
-            print(self.visited_positions)
+            # print(self.visited_positions)
             # print("postitions after visit", self.position_stack)
             next_position = self.position_stack.pop()
             while self.current_position == next_position or next_position[0] > self.max_x or next_position[1] > self.max_y:
