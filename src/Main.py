@@ -142,6 +142,7 @@ def main ( ):
         sumOfScoresSquared = 0
 
         for file in listOfWorlds:
+            print ( "Running world: " + str(file) )
             if verbose:
                 print ( "Running world: " + str(file) )
 
