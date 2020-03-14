@@ -51,8 +51,11 @@ class MyAI ( Agent ):
         self.action_queue = [Agent.Action.CLIMB]
         self.current_direction = (1,0)
         self.current_position = (1,1)
+        self.stench_tracker = list()
+        self.wumpus_position = []
         self.max_x = float("inf")
         self.max_y = float("inf")
+        self.wumpus_dead = False
         self.has_gold = False
     def getAction( self, stench, breeze, glitter, bump, scream ):
 
@@ -62,9 +65,12 @@ class MyAI ( Agent ):
         # print("positions before visit",self.position_stack)
         # print("visited", self.visited_positions)
         # print("actions",self.action_queue)
+        if self.wumpus_dead:
+            stench = False
+
         if self.last_action == Agent.Action.FORWARD:
+
             # print("check empty", self.getUnvisitedAdjacentPositions())
-           
             self.visited_positions.add(self.current_position)
             # if self.getUnvisitedAdjacentPositions() != set():
             #     self.position_stack.append(self.last_position)
@@ -72,6 +78,18 @@ class MyAI ( Agent ):
                 return Agent.Action.CLIMB
             if self.current_position == (1,1) and (self.has_gold or self.getUnvisitedAdjacentPositions() == set()):
                 return Agent.Action.CLIMB
+            if stench and not breeze:
+                if self.current_position not in self.stench_tracker:
+                    self.stench_tracker.append(self.current_position)
+                if(self.findWumpusLocation(len(self.stench_tracker))):
+                    self.position_stack.append(self.current_position)
+                    self.position_stack.append(self.wumpus_position)
+                    # print("current postion", self.current_position)
+                    # print("wumpus", self.wumpus_position)
+                    # print("curr dir", self.current_direction)
+                    # print("wumpus locations", self.stench_tracker)
+                    # print("JNFODSNOSDFHODHFOSDHFODFJOSDFJOSDJFOSDJFOIDFJODJFDS:IFJOSDIFJSDOFJSDOIFJSDOFJSDOIFJDSOIFJDFIOJ",self.action_queue)
+            
             if bump:
                 if self.current_position[0] >= self.current_position[1] and self.current_direction == (1, 0):
                     self.max_x = self.current_position[0] -1
@@ -89,7 +107,7 @@ class MyAI ( Agent ):
             next_position = self.position_stack.pop()
             while self.current_position == next_position or next_position[0] > self.max_x and next_position[1] > self.max_y:
                 next_position = self.position_stack.pop()
-            self.queuePosition(next_position)
+            self.queuePosition(next_position, Agent.Action.FORWARD)
             # print("current posiiton", self.current_position)
             # print("next position",next_position)
             # print("current direction", self.current_direction)
@@ -98,16 +116,23 @@ class MyAI ( Agent ):
                 self.has_gold = True
             self.last_position = self.current_position
             self.current_position = next_position
-           
+        if scream:
+            self.wumpus_dead = True
+            for x in self.stench_tracker:
+                if x in self.visited_positions:
+                    self.visited_positions.remove(x)
+            print("WUMPUS DEAD")
         self.last_action = self.action_queue.pop(0)
         return self.last_action
 
-    def queuePosition(self, new_position):
+    def queuePosition(self, new_position, endAction):
         # print((new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]))
         turns = self.getTurns( (new_position[0] - self.current_position[0], new_position[1] - self.current_position[1]) )
         self.current_direction = (new_position[0] - self.current_position[0], new_position[1] - self.current_position[1])
         self.action_queue = turns + self.action_queue
-        self.action_queue.insert(len(turns), Agent.Action.FORWARD)
+        self.action_queue.insert(len(turns), endAction)
+        if self.wumpus_dead != True and len(self.wumpus_position) != 0:
+            self.action_queue.insert(len(turns), Agent.Action.SHOOT)
 
     def getTurns(self, new_direction):
         turns = []
@@ -126,6 +151,23 @@ class MyAI ( Agent ):
                 turns.append(Agent.Action.TURN_LEFT)
             # print(temp_direction, new_direction)
         return turns
+    def findWumpusLocation(self ,tracker):
+        if len(self.wumpus_position) != 0:
+            return False
+        if tracker == 2:
+            if self.stench_tracker[0][0] == self.stench_tracker[1][0]:
+                self.wumpus_position = (self.stench_tracker[0][0] ,min(self.stench_tracker[0][1], self.stench_tracker[1][1]) + 1)
+                return True
+            elif self.stench_tracker[0][1] == self.stench_tracker[1][1]:
+                self.wumpus_position = (min(self.stench_tracker[0][0], self.stench_tracker[1][0]) + 1, self.stench_tracker[1][1])
+                return True
+            else:
+                if (self.stench_tracker[0][0], self.stench_tracker[1][1]) in self.visited_positions:
+                    self.wumpus_position = (self.stench_tracker[1][0], self.stench_tracker[0][1])
+                    return True
+                elif (self.stench_tracker[1][0], self.stench_tracker[0][1]) in self.visited_positions:
+                    self.wumpus_position = (self.stench_tracker[0][0], self.stench_tracker[1][1])
+                    return True 
 
     def getUnvisitedAdjacentPositions(self):
         possible_moves = set()
