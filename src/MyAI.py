@@ -77,8 +77,9 @@ class MyAI ( Agent ):
             if (breeze or stench) and self.current_position == (1,1):
                 print("running")
                 return Agent.Action.CLIMB
-                print("running2")
+                
             if self.current_position == (1,1) and (self.has_gold or self.getUnvisitedAdjacentPositions() == set()):
+                print("running2")
                 return Agent.Action.CLIMB
             if stench and not breeze:
                 if self.current_position not in self.stench_tracker:
