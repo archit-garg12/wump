@@ -75,7 +75,9 @@ class MyAI ( Agent ):
             # if self.getUnvisitedAdjacentPositions() != set():
             #     self.position_stack.append(self.last_position)
             if (breeze or stench) and self.current_position == (1,1):
+                print("running")
                 return Agent.Action.CLIMB
+                print("running2")
             if self.current_position == (1,1) and (self.has_gold or self.getUnvisitedAdjacentPositions() == set()):
                 return Agent.Action.CLIMB
             if stench and not breeze:
